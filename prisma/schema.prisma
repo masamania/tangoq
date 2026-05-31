@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── NextAuth required models ──────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Application models ───────────────────────────────────────────────────
+
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String        @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  decks         Deck[]
+  settings      UserSettings?
+  chatSessions  ChatSession[]
+  roundSummaries RoundSummary[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model UserSettings {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  encryptedApiKey String? @db.Text  // AES-256-GCM encrypted Claude API key
+  preferredModel  String  @default("claude-sonnet-4-6")
+  shuffleDefault  Boolean @default(false)
+}
+
+model Deck {
+  id           String         @id @default(cuid())
+  name         String
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentRound Int            @default(1)
+  cards        Card[]
+  roundSummaries RoundSummary[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([userId])
+}
+
+model Card {
+  id           String        @id @default(cuid())
+  deckId       String
+  deck         Deck          @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  front        String        @db.Text
+  back         String        @db.Text
+  comment      String        @db.Text @default("")
+  frontLang    String        @default("")
+  backLang     String        @default("")
+  order        Int           // position within deck
+  status       String?       // correct | incorrect | pending | star
+  chatSessions ChatSession[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([deckId, order])
+}
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  cardId    String
+  card      Card          @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([cardId])
+  @@index([userId])
+}
+
+model ChatMessage {
+  id            String      @id @default(cuid())
+  chatSessionId String
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  role          String      // user | assistant
+  content       String      @db.Text
+  createdAt     DateTime    @default(now())
+
+  @@index([chatSessionId])
+}
+
+// Summary generated at end of each study round
+model RoundSummary {
+  id        String   @id @default(cuid())
+  deckId    String
+  deck      Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  round     Int
+  content   String   @db.Text  // Markdown summary from Claude
+  createdAt DateTime @default(now())
+
+  @@index([deckId, round])
+}
