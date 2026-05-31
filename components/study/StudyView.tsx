@@ -224,7 +224,10 @@ export default function StudyView({ deck, userId, initialFilter, initialShuffle 
               {showComment ? '▲' : '▼'}　解説を{showComment ? '閉じる' : '表示する'}
             </button>
             {showComment && (
-              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-xl p-4 text-base text-amber-900 whitespace-pre-wrap leading-relaxed">
+              <div
+                className="mt-2 bg-amber-50 border border-amber-200 rounded-xl p-4 text-base text-amber-900 whitespace-pre-wrap leading-relaxed overflow-y-auto"
+                style={{ maxHeight: '240px', WebkitOverflowScrolling: 'touch' }}
+              >
                 {card.comment}
               </div>
             )}
