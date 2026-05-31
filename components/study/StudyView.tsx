@@ -29,15 +29,15 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 interface Props {
-  deck:           DeckWithCards
+  deck:             DeckWithCards
   userId:           string
   initialFilter:    Filter
   initialShuffle:   boolean
-  autoAdvance:      boolean
-  autoAdvanceDelay: number
+  autoAdvance?:     boolean
+  autoAdvanceDelay?: number
 }
 
-export default function StudyView({ deck, userId, initialFilter, initialShuffle, autoAdvance, autoAdvanceDelay }: Props) {
+export default function StudyView({ deck, userId, initialFilter, initialShuffle, autoAdvance = false, autoAdvanceDelay = 3 }: Props) {
   const router = useRouter()
 
   // Build study order
