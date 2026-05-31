@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import toast from 'react-hot-toast'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface Message { role: 'user' | 'assistant'; content: string }
 
@@ -154,19 +156,30 @@ export default function AiChatPanel({ card }: Props) {
           messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                   m.role === 'user'
-                    ? 'bg-indigo-600 text-white rounded-br-md'
+                    ? 'bg-indigo-600 text-white rounded-br-md whitespace-pre-wrap'
                     : 'bg-slate-100 text-slate-800 rounded-bl-md'
                 }`}
               >
-                {m.content || (isLoading && i === messages.length - 1 ? (
-                  <span className="inline-flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </span>
-                ) : '')}
+                {m.role === 'assistant' ? (
+                  m.content ? (
+                    <div className="prose prose-sm prose-slate max-w-none
+                      prose-p:my-1 prose-li:my-0.5 prose-ul:my-1 prose-ol:my-1
+                      prose-headings:my-2 prose-pre:text-xs prose-code:text-xs
+                      prose-strong:font-bold">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                    </div>
+                  ) : isLoading && i === messages.length - 1 ? (
+                    <span className="inline-flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </span>
+                  ) : null
+                ) : (
+                  m.content
+                )}
               </div>
             </div>
           ))
