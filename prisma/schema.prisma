@@ -72,6 +72,8 @@ model UserSettings {
   preferredProvider    String  @default("anthropic")  // anthropic | openai | google
   preferredModel       String  @default("claude-sonnet-4-6")
   shuffleDefault       Boolean @default(false)
+  autoAdvance          Boolean @default(false)        // 判定後に自動で次へ進む
+  autoAdvanceDelay     Int     @default(3)            // 自動送りの間隔（秒）
 }
 
 model Deck {

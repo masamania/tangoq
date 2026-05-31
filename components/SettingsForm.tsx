@@ -11,6 +11,8 @@ interface Props {
   preferredProvider: string
   preferredModel:    string
   shuffleDefault:    boolean
+  autoAdvance:       boolean
+  autoAdvanceDelay:  number
 }
 
 export default function SettingsForm({
@@ -20,10 +22,14 @@ export default function SettingsForm({
   preferredProvider: initProvider,
   preferredModel:  initModel,
   shuffleDefault:  initShuffle,
+  autoAdvance:     initAutoAdvance,
+  autoAdvanceDelay: initDelay,
 }: Props) {
-  const [provider,     setProvider]     = useState<Provider>((initProvider as Provider) || 'anthropic')
-  const [model,        setModel]        = useState(initModel)
-  const [shuffle,      setShuffle]      = useState(initShuffle)
+  const [provider,      setProvider]      = useState<Provider>((initProvider as Provider) || 'anthropic')
+  const [model,         setModel]         = useState(initModel)
+  const [shuffle,       setShuffle]       = useState(initShuffle)
+  const [autoAdvance,   setAutoAdvance]   = useState(initAutoAdvance)
+  const [advanceDelay,  setAdvanceDelay]  = useState(initDelay)
   const [saving,       setSaving]       = useState(false)
   const [anthropicKey, setAnthropicKey] = useState('')
   const [openAiKey,    setOpenAiKey]    = useState('')
@@ -52,7 +58,7 @@ export default function SettingsForm({
 
   async function save() {
     setSaving(true)
-    const body: Record<string, unknown> = { preferredProvider: provider, preferredModel: model, shuffleDefault: shuffle }
+    const body: Record<string, unknown> = { preferredProvider: provider, preferredModel: model, shuffleDefault: shuffle, autoAdvance, autoAdvanceDelay: advanceDelay }
     if (anthropicKey) body.anthropicKey = anthropicKey
     if (openAiKey)    body.openAiKey    = openAiKey
     if (googleKey)    body.googleKey    = googleKey
@@ -125,15 +131,44 @@ export default function SettingsForm({
       {/* Preferences */}
       <section className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
         <h2 className="font-bold text-slate-700 mb-4">⚙️ 学習設定</h2>
-        <label className="flex items-center justify-between gap-3 cursor-pointer">
-          <div>
-            <p className="text-sm font-medium text-slate-700">🔀 デフォルトでシャッフル</p>
-            <p className="text-xs text-slate-400 mt-0.5">学習開始時のデフォルト設定</p>
+        <div className="space-y-4">
+
+          {/* Shuffle */}
+          <label className="flex items-center justify-between gap-3 cursor-pointer">
+            <div>
+              <p className="text-sm font-medium text-slate-700">🔀 デフォルトでシャッフル</p>
+              <p className="text-xs text-slate-400 mt-0.5">学習開始時のデフォルト設定</p>
+            </div>
+            <div onClick={() => setShuffle(s => !s)} className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors flex-shrink-0 ${shuffle ? 'bg-indigo-600' : 'bg-slate-200'}`}>
+              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${shuffle ? 'translate-x-7' : 'translate-x-1'}`} />
+            </div>
+          </label>
+
+          {/* Auto-advance */}
+          <div className="border-t border-slate-50 pt-4">
+            <label className="flex items-center justify-between gap-3 cursor-pointer mb-3">
+              <div>
+                <p className="text-sm font-medium text-slate-700">⏩ 判定後に自動で次へ進む</p>
+                <p className="text-xs text-slate-400 mt-0.5">✓✗⭐⏭ を押した後、自動的に次のカードへ</p>
+              </div>
+              <div onClick={() => setAutoAdvance(a => !a)} className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors flex-shrink-0 ${autoAdvance ? 'bg-indigo-600' : 'bg-slate-200'}`}>
+                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${autoAdvance ? 'translate-x-7' : 'translate-x-1'}`} />
+              </div>
+            </label>
+
+            {autoAdvance && (
+              <div className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3">
+                <span className="text-sm text-slate-600 flex-1">自動送りの間隔</span>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setAdvanceDelay(d => Math.max(1, d - 1))} className="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 transition font-bold">−</button>
+                  <span className="text-base font-bold text-slate-800 w-12 text-center">{advanceDelay}秒</span>
+                  <button onClick={() => setAdvanceDelay(d => Math.min(30, d + 1))} className="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 transition font-bold">＋</button>
+                </div>
+              </div>
+            )}
           </div>
-          <div onClick={() => setShuffle(s => !s)} className={`relative w-12 h-6 rounded-full cursor-pointer transition-colors ${shuffle ? 'bg-indigo-600' : 'bg-slate-200'}`}>
-            <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${shuffle ? 'translate-x-7' : 'translate-x-1'}`} />
-          </div>
-        </label>
+
+        </div>
       </section>
 
       <button onClick={save} disabled={saving} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition disabled:opacity-40">

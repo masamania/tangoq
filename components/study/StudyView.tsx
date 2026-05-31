@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -30,12 +30,14 @@ function shuffle<T>(arr: T[]): T[] {
 
 interface Props {
   deck:           DeckWithCards
-  userId:         string
-  initialFilter:  Filter
-  initialShuffle: boolean
+  userId:           string
+  initialFilter:    Filter
+  initialShuffle:   boolean
+  autoAdvance:      boolean
+  autoAdvanceDelay: number
 }
 
-export default function StudyView({ deck, userId, initialFilter, initialShuffle }: Props) {
+export default function StudyView({ deck, userId, initialFilter, initialShuffle, autoAdvance, autoAdvanceDelay }: Props) {
   const router = useRouter()
 
   // Build study order
@@ -45,6 +47,8 @@ export default function StudyView({ deck, userId, initialFilter, initialShuffle 
   })
   const [cardIdx,      setCardIdx]      = useState(0)
   const [flipped,      setFlipped]      = useState(false)
+  const [countdown,    setCountdown]    = useState<number | null>(null)
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [showComment,  setShowComment]  = useState(false)
   const [showChat,     setShowChat]     = useState(false)
   const [showSummary,  setShowSummary]  = useState(false)
@@ -86,17 +90,28 @@ export default function StudyView({ deck, userId, initialFilter, initialShuffle 
   }, [cardIdx, isLast, flipped, card, showChat, showSummary])
 
   const next = useCallback(() => {
+    clearCountdown()
     setCardIdx(i => i + 1)
     setFlipped(false)
     setShowComment(false)
     setShowChat(false)
-  }, [])
+  }, [clearCountdown])
 
   const prev = useCallback(() => {
+    clearCountdown()
     setCardIdx(i => i - 1)
     setFlipped(false)
     setShowComment(false)
     setShowChat(false)
+  }, [clearCountdown])
+
+  // Clear countdown timer
+  const clearCountdown = useCallback(() => {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current)
+      countdownRef.current = null
+    }
+    setCountdown(null)
   }, [])
 
   const judge = useCallback(async (status: string) => {
@@ -108,14 +123,27 @@ export default function StudyView({ deck, userId, initialFilter, initialShuffle 
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ status }),
     })
-    // Auto-advance
-    if (!isLast) {
-      setCardIdx(i => i + 1)
-      setFlipped(false)
-      setShowComment(false)
-      setShowChat(false)
+    // Auto-advance (if enabled in settings)
+    if (autoAdvance && !isLast) {
+      clearCountdown()
+      let remaining = autoAdvanceDelay
+      setCountdown(remaining)
+      countdownRef.current = setInterval(() => {
+        remaining -= 1
+        if (remaining <= 0) {
+          clearInterval(countdownRef.current!)
+          countdownRef.current = null
+          setCountdown(null)
+          setCardIdx(i => i + 1)
+          setFlipped(false)
+          setShowComment(false)
+          setShowChat(false)
+        } else {
+          setCountdown(remaining)
+        }
+      }, 1000)
     }
-  }, [card, isLast])
+  }, [card, isLast, autoAdvance, autoAdvanceDelay, clearCountdown])
 
   async function startNextRound(filter: Filter, doShuffle = false) {
     // Increment round on server
@@ -254,6 +282,19 @@ export default function StudyView({ deck, userId, initialFilter, initialShuffle 
             card={{ id: card.id, front: card.front, back: card.back, comment: card.comment }}
             userId={userId}
           />
+        )}
+
+        {/* Auto-advance countdown */}
+        {countdown !== null && (
+          <div className="flex items-center justify-between bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-2.5">
+            <span className="text-sm text-indigo-700">{countdown}秒後に次のカードへ...</span>
+            <button
+              onClick={clearCountdown}
+              className="text-xs text-indigo-500 hover:text-indigo-700 font-medium border border-indigo-200 rounded-lg px-3 py-1 transition"
+            >
+              キャンセル
+            </button>
+          </div>
         )}
 
         {/* Navigation */}

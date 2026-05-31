@@ -22,6 +22,8 @@ export async function GET() {
     preferredProvider: s?.preferredProvider  ?? 'anthropic',
     preferredModel:    s?.preferredModel     ?? 'claude-sonnet-4-6',
     shuffleDefault:    s?.shuffleDefault     ?? false,
+    autoAdvance:       s?.autoAdvance        ?? false,
+    autoAdvanceDelay:  s?.autoAdvanceDelay   ?? 3,
   })
 }
 
@@ -36,6 +38,8 @@ export async function PUT(req: NextRequest) {
   if (body.preferredProvider !== undefined) updateData.preferredProvider = body.preferredProvider
   if (body.preferredModel    !== undefined) updateData.preferredModel    = body.preferredModel
   if (body.shuffleDefault    !== undefined) updateData.shuffleDefault    = body.shuffleDefault
+  if (body.autoAdvance       !== undefined) updateData.autoAdvance       = body.autoAdvance
+  if (body.autoAdvanceDelay  !== undefined) updateData.autoAdvanceDelay  = Number(body.autoAdvanceDelay)
   if (body.anthropicKey) updateData.encryptedApiKey    = encryptApiKey(body.anthropicKey as string)
   if (body.openAiKey)    updateData.encryptedOpenAiKey = encryptApiKey(body.openAiKey    as string)
   if (body.googleKey)    updateData.encryptedGoogleKey = encryptApiKey(body.googleKey    as string)

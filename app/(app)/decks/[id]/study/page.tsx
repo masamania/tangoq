@@ -9,15 +9,18 @@ interface Props {
 }
 
 export default async function StudyPage({ params, searchParams }: Props) {
-  const { id }             = await params
+  const { id }              = await params
   const { filter, shuffle } = await searchParams
-  const session            = await auth()
-  const userId             = session!.user!.id!
+  const session             = await auth()
+  const userId              = session!.user!.id!
 
-  const deck = await prisma.deck.findFirst({
-    where:   { id, userId },
-    include: { cards: { orderBy: { order: 'asc' } } },
-  })
+  const [deck, settings] = await Promise.all([
+    prisma.deck.findFirst({
+      where:   { id, userId },
+      include: { cards: { orderBy: { order: 'asc' } } },
+    }),
+    prisma.userSettings.findUnique({ where: { userId } }),
+  ])
 
   if (!deck) notFound()
 
@@ -27,6 +30,8 @@ export default async function StudyPage({ params, searchParams }: Props) {
       userId={userId}
       initialFilter={(filter as 'all' | 'star' | 'incorrect' | 'unanswered') ?? 'all'}
       initialShuffle={shuffle === 'true'}
+      autoAdvance={settings?.autoAdvance ?? false}
+      autoAdvanceDelay={settings?.autoAdvanceDelay ?? 3}
     />
   )
 }
