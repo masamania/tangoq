@@ -61,12 +61,17 @@ model User {
 }
 
 model UserSettings {
-  id              String  @id @default(cuid())
-  userId          String  @unique
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  encryptedApiKey String? @db.Text  // AES-256-GCM encrypted Claude API key
-  preferredModel  String  @default("claude-sonnet-4-6")
-  shuffleDefault  Boolean @default(false)
+  id                   String  @id @default(cuid())
+  userId               String  @unique
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // API keys (AES-256-GCM encrypted)
+  encryptedApiKey      String? @db.Text  // Anthropic (Claude)
+  encryptedOpenAiKey   String? @db.Text  // OpenAI (GPT)
+  encryptedGoogleKey   String? @db.Text  // Google (Gemini)
+  // Provider & model selection
+  preferredProvider    String  @default("anthropic")  // anthropic | openai | google
+  preferredModel       String  @default("claude-sonnet-4-6")
+  shuffleDefault       Boolean @default(false)
 }
 
 model Deck {

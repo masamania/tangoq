@@ -133,7 +133,7 @@ export default function DeckGrid({ decks, statsMap }: Props) {
                 value={deckName}
                 onChange={e => setDeckName(e.target.value)}
                 placeholder="例：Salesforce問題集"
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 autoFocus
               />
             </div>

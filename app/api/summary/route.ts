@@ -1,11 +1,10 @@
 export const dynamic = 'force-dynamic'
 
 import { streamText } from 'ai'
-import { createAnthropic } from '@ai-sdk/anthropic'
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { decryptApiKey } from '@/lib/crypto'
+import { getAiModel } from '@/lib/ai'
 import { z } from 'zod'
 
 // GET /api/summary?deckId=xxx&round=N
@@ -39,11 +38,20 @@ export async function POST(req: NextRequest) {
   const { deckId, round } = body.data
   const userId = session.user.id
 
-  // Get user's API key
   const settings = await prisma.userSettings.findUnique({ where: { userId } })
-  if (!settings?.encryptedApiKey) {
+  if (!settings) {
     return new Response(
       JSON.stringify({ error: 'APIキーが設定されていません。' }),
+      { status: 402, headers: { 'Content-Type': 'application/json' } },
+    )
+  }
+
+  let aiModel
+  try {
+    aiModel = getAiModel(settings)
+  } catch (e) {
+    return new Response(
+      JSON.stringify({ error: (e as Error).message }),
       { status: 402, headers: { 'Content-Type': 'application/json' } },
     )
   }
@@ -87,10 +95,6 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const apiKey    = decryptApiKey(settings.encryptedApiKey)
-  const anthropic = createAnthropic({ apiKey })
-  const model     = settings.preferredModel || 'claude-sonnet-4-6'
-
   const prompt = `あなたは学習コーチです。以下は学習者が単語帳「${deck.name}」の第${round}周目で行ったAIとの学習会話です。
 
 ${chatContext}
@@ -114,7 +118,7 @@ ${chatContext}
 日本語で、簡潔かつ具体的に書いてください。`
 
   const result = streamText({
-    model:  anthropic(model),
+    model:  aiModel,
     prompt,
     onFinish: async ({ text }) => {
       // Upsert round summary
