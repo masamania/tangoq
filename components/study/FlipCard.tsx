@@ -17,28 +17,46 @@ export default function FlipCard({ front, back, flipped, onClick }: Props) {
       <div
         className="relative w-full rounded-2xl shadow-md transition-transform duration-500"
         style={{
-          transformStyle:     'preserve-3d',
-          transform:          flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-          height:             '300px',
+          transformStyle: 'preserve-3d',
+          transform:      flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+          height:         '300px',
         }}
       >
         {/* Front */}
         <div
-          className="absolute inset-0 bg-white rounded-2xl p-6 flex flex-col overflow-hidden"
-          style={{ backfaceVisibility: 'hidden' }}
+          className="absolute inset-0 bg-white rounded-2xl p-6 flex flex-col"
+          style={{ backfaceVisibility: 'hidden', overflow: 'hidden' }}
         >
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300 mb-3">問 題</span>
-          <p className="flex-1 text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto text-slate-800">{front}</p>
-          <p className="text-center text-[11px] text-slate-300 mt-3">クリックして答えを確認 →</p>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300 mb-3 flex-shrink-0">
+            問 題
+          </span>
+          <p
+            className="flex-1 text-sm leading-relaxed whitespace-pre-wrap text-slate-800 min-h-0"
+            style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {front}
+          </p>
+          <p className="text-center text-[11px] text-slate-300 mt-3 flex-shrink-0">
+            タップして答えを確認 →
+          </p>
         </div>
 
         {/* Back */}
         <div
-          className="absolute inset-0 bg-indigo-700 text-white rounded-2xl p-6 flex flex-col overflow-hidden"
-          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+          className="absolute inset-0 bg-indigo-700 text-white rounded-2xl p-6 flex flex-col"
+          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', overflow: 'hidden' }}
         >
-          <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300 mb-3">正 解</span>
-          <p className="flex-1 text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto">{back}</p>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-300 mb-3 flex-shrink-0">
+            正 解
+          </span>
+          <p
+            className="flex-1 text-sm leading-relaxed whitespace-pre-wrap min-h-0"
+            style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {back}
+          </p>
         </div>
       </div>
     </div>
