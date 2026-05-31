@@ -89,6 +89,15 @@ export default function StudyView({ deck, userId, initialFilter, initialShuffle,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardIdx, isLast, flipped, card, showChat, showSummary])
 
+  // Clear countdown timer — defined first (used by next/prev/judge)
+  const clearCountdown = useCallback(() => {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current)
+      countdownRef.current = null
+    }
+    setCountdown(null)
+  }, [])
+
   const next = useCallback(() => {
     clearCountdown()
     setCardIdx(i => i + 1)
@@ -104,15 +113,6 @@ export default function StudyView({ deck, userId, initialFilter, initialShuffle,
     setShowComment(false)
     setShowChat(false)
   }, [clearCountdown])
-
-  // Clear countdown timer
-  const clearCountdown = useCallback(() => {
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current)
-      countdownRef.current = null
-    }
-    setCountdown(null)
-  }, [])
 
   const judge = useCallback(async (status: string) => {
     if (!card) return
