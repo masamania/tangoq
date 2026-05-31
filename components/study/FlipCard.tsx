@@ -77,13 +77,12 @@ export default function FlipCard({ front, back, flipped, onClick }: Props) {
               {back}
             </p>
           </div>
+
+          <div className="px-6 py-3 flex-shrink-0 text-center">
+            <span className="text-[11px] text-indigo-300">タップして問題を確認 →</span>
+          </div>
         </div>
       </div>
-
-      {/* Tap zone: always flips the card */}
-      <p className="text-center text-xs text-slate-400 mt-2">
-        {flipped ? '↩ 問題に戻る' : '↩ タップでめくる'}
-      </p>
     </div>
   )
 }
