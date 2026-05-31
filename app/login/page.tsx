@@ -4,8 +4,8 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-md text-center">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">📖 TANGO</h1>
-        <p className="text-slate-500 mb-8 text-sm">AI搭載の単語帳アプリ</p>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">📖 TANGOQ</h1>
+        <p className="text-slate-500 mb-8 text-sm">AI搭載の単語帳・深掘り学習アプリ</p>
 
         <div className="flex flex-col gap-3">
           <form

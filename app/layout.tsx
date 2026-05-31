@@ -6,8 +6,8 @@ import './globals.css'
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 
 export const metadata: Metadata = {
-  title: 'TANGO — AI単語帳',
-  description: 'Claude AIと深掘り学習できるフラッシュカードアプリ',
+  title: 'TANGOQ — AI単語帳',
+  description: 'AI（Claude・GPT・Gemini）と深掘り学習できるフラッシュカードアプリ',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

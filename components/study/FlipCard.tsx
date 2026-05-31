@@ -43,7 +43,7 @@ export default function FlipCard({ front, back, flipped, onClick }: Props) {
             }}
             onClick={e => e.stopPropagation()} // scroll area tap doesn't flip
           >
-            <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-800 pb-2">
+            <p className="text-base leading-relaxed whitespace-pre-wrap text-slate-800 pb-2">
               {front}
             </p>
           </div>
@@ -73,7 +73,7 @@ export default function FlipCard({ front, back, flipped, onClick }: Props) {
             }}
             onClick={e => e.stopPropagation()}
           >
-            <p className="text-sm leading-relaxed whitespace-pre-wrap pb-2">
+            <p className="text-base leading-relaxed whitespace-pre-wrap pb-2">
               {back}
             </p>
           </div>
