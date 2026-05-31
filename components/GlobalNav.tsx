@@ -42,7 +42,7 @@ export default function GlobalNav({ user }: Props) {
             <img src={user.image} alt={user.name ?? ''} className="w-8 h-8 rounded-full border-2 border-white/40" />
           ) : (
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">
-              {(user?.name ?? user?.email ?? '?')[0].toUpperCase()}
+              {(user?.name || user?.email || '?')[0].toUpperCase()}
             </div>
           )}
         </button>
